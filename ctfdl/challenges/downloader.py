@@ -78,8 +78,7 @@ async def download_challenges(config: ExportConfig, emitter: EventEmitter) -> tu
                 config,
                 output_dir,
             )
-            if entry:
-                all_challenges_data.append(entry)
+            all_challenges_data.append(entry)
             await emitter.emit("challenge_success", challenge=chal)
         except Exception as e:
             await emitter.emit("challenge_fail", challenge=chal, reason=str(e))
@@ -124,7 +123,7 @@ async def process_challenge(
     template_engine: TemplateEngine,
     config: ExportConfig,
     output_dir: Path,
-):
+) -> ChallengeEntry:
     rel_path_str = template_engine.render_path(config.folder_template_name, chal)
     chal_folder = output_dir / rel_path_str
 
@@ -132,7 +131,7 @@ async def process_challenge(
 
     if existed_before and not config.update:
         await emitter.emit("challenge_skipped", challenge=chal)
-        return
+        return ChallengeEntry(data=chal, path=Path(rel_path_str))
 
     async def progress_callback(pd: ProgressData):
         await emitter.emit("attachment_progress", progress_data=pd, challenge=chal)
